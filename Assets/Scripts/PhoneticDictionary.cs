@@ -5,7 +5,7 @@ using System.IO;
 public class PhoneticDictionary : MonoBehaviour
 {
 	private const string _FILE_PATH = "./Assets/Data/PHONETIC_DICTIONARY_BASE_A.csv";
-	private List<PhoneticDictionaryItem> _list_MainDictionaryItems;
+	public List<PhoneticDictionaryItem> _list_MainDictionaryItems;
 
 	private void Awake()
 	{
@@ -16,25 +16,47 @@ public class PhoneticDictionary : MonoBehaviour
 	{
 		StreamReader reader = new StreamReader(File.OpenRead(_FILE_PATH));
 		_list_MainDictionaryItems = new List<PhoneticDictionaryItem>();
-        List<PhoneticDictionaryItem> list_RelatedItems = new List<PhoneticDictionaryItem>();
-        PhoneticDictionaryItem currentMainItem = null;
-		while (!reader.EndOfStream)
+        PhoneticDictionaryItem previousMainItem = null;
+        string[] sLineComponents;
+        int iParenLocation_Curr, iParenLocation_Prev;
+        string sMainWord_Curr, sMainWord_Prev;
+
+        while (!reader.EndOfStream)
 		{
-			string[] sLineComponents = reader.ReadLine().Split(',');
-            if (sLineComponents[0].Contains("/")) // Related Item
+			sLineComponents = reader.ReadLine().Split(',');
+            for(int i = 0; i < sLineComponents.Length; i++)
             {
-                sLineComponents[0].Replace("/", currentMainItem.sWord);
-                sLineComponents[1].Replace("/", currentMainItem.sDictionaryPronunciation);
-                sLineComponents[2].Replace("/", currentMainItem.sPhoneticSpelling);
-                currentMainItem.list_RelatedItems.Add(new PhoneticDictionaryItem(sLineComponents[0], sLineComponents[1], sLineComponents[2]));
+                sLineComponents[i] = sLineComponents[i].Trim();
             }
-            else // Main Item
+            sMainWord_Curr = null;
+            sMainWord_Prev = null;
+
+            if (previousMainItem != null)
             {
-                if(currentMainItem != null)
+                iParenLocation_Curr = sLineComponents[0].IndexOf('(');
+                sMainWord_Curr = iParenLocation_Curr > 0 ? sLineComponents[0].Substring(0, iParenLocation_Curr).Trim() : sLineComponents[0];
+                iParenLocation_Prev = previousMainItem.sWord.IndexOf('(');
+                sMainWord_Prev = iParenLocation_Prev > 0 ? previousMainItem.sWord.Substring(0, iParenLocation_Prev).Trim() : previousMainItem.sWord;
+            }
+
+            if (sMainWord_Curr != null && sMainWord_Prev != null && sMainWord_Curr.Equals(sMainWord_Prev)) // Related Item
+            {
+                previousMainItem.list_RelatedItems.Add(new PhoneticDictionaryItem(sLineComponents[0], sLineComponents[1], sLineComponents[2]));
+            }
+            else if (sLineComponents[0].Contains("/")) // Use Case Item
+            {
+                sLineComponents[0].Replace("/", previousMainItem.sWord);
+                sLineComponents[1].Replace("/", previousMainItem.sDictionaryPronunciation);
+                sLineComponents[2].Replace("/", previousMainItem.sPhoneticSpelling);
+                previousMainItem.list_UseCases.Add(new PhoneticDictionaryItem(sLineComponents[0], sLineComponents[1], sLineComponents[2]));
+            }
+            else // New Main Item
+            {
+                if(previousMainItem != null)
                 {
-                    _list_MainDictionaryItems.Add(currentMainItem);
+                    _list_MainDictionaryItems.Add(previousMainItem);
                 }
-                currentMainItem = new PhoneticDictionaryItem(sLineComponents[0], sLineComponents[1], sLineComponents[2]);
+                previousMainItem = new PhoneticDictionaryItem(sLineComponents[0], sLineComponents[1], sLineComponents[2]);
             }
 		}
 	}
@@ -47,12 +69,14 @@ public class PhoneticDictionary : MonoBehaviour
         }
     }
 
-    private class PhoneticDictionaryItem
+    [System.Serializable]
+    public class PhoneticDictionaryItem
     {
         public string sWord;
         public string sDictionaryPronunciation;
         public string sPhoneticSpelling;
         public List<PhoneticDictionaryItem> list_RelatedItems;
+        public List<PhoneticDictionaryItem> list_UseCases;
 
         public PhoneticDictionaryItem(string sWord, string sDictionaryPronunciation, string sPhoneticSpelling)
         {
@@ -61,6 +85,7 @@ public class PhoneticDictionary : MonoBehaviour
             this.sPhoneticSpelling = sPhoneticSpelling;
 
             list_RelatedItems = new List<PhoneticDictionaryItem>();
+            list_UseCases = new List<PhoneticDictionaryItem>();
         }
     }
 }
