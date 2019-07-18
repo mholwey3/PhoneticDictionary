@@ -9,7 +9,12 @@ public static class ViewManager
     public const string VIEW_SEARCH = "Views/Search";
     public const string VIEW_ITEM_DISPLAY = "Views/ItemDetail";
 
-    public static void LoadScene(string sSceneToLoad, Hashtable args)
+    public static void LoadView(string sSceneToLoad)
+    {
+        SceneManager.LoadScene(sSceneToLoad);
+    }
+
+    public static void LoadView(string sSceneToLoad, Hashtable args)
     {
         Arguments = args;
         SceneManager.LoadScene(sSceneToLoad);

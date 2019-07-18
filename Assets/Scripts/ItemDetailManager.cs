@@ -15,4 +15,21 @@ public class ItemDetailManager : MonoBehaviour
         _item = ViewManager.Arguments["item"] as PhoneticDictionary.PhoneticDictionaryItem;
     }
 
+    public void Start()
+    {
+        SetItemValuesOnRelevantFields();
+    }
+
+    private void SetItemValuesOnRelevantFields()
+    {
+        text_Word.text = _item.sWord;
+        text_DictionaryPronunciation.text = _item.sDictionaryPronunciation;
+        text_PhoneticSpelling.text = _item.sPhoneticSpelling;
+    }
+
+    public void LoadSearchView()
+    {
+        ViewManager.LoadView(ViewManager.VIEW_SEARCH);
+    }
+
 }

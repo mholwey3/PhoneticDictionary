@@ -25,9 +25,16 @@ public class SearchManager : MonoBehaviour
     {
         _item = _phoneticDictionary.GetDictionaryItem(sWord);
 
+        if(_item == null)
+        {
+            //TODO: Do something graceful here...like a popup message
+            Debug.LogError("The search yielded no result.");
+            return;
+        }
+
         _arguments.Clear();
         _arguments.Add("item", _item);
 
-        ViewManager.LoadScene(ViewManager.VIEW_ITEM_DISPLAY, _arguments);
+        ViewManager.LoadView(ViewManager.VIEW_ITEM_DISPLAY, _arguments);
     }
 }

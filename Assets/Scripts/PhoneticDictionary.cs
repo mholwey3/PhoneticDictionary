@@ -14,6 +14,7 @@ public class PhoneticDictionary : MonoBehaviour
 	{
 		StreamReader reader = new StreamReader(File.OpenRead(_FILE_PATH));
         PhoneticDictionaryItem item = null;
+        string sLine;
         string[] sLineComponents;
         int iParenLocation_Curr;
         string sMainWord_Curr;
@@ -22,7 +23,8 @@ public class PhoneticDictionary : MonoBehaviour
 
         while (!reader.EndOfStream)
 		{
-			sLineComponents = reader.ReadLine().Split(',');
+            sLine = reader.ReadLine();
+            sLineComponents = sLine.Split(',');
             for(int i = 0; i < sLineComponents.Length; i++)
             {
                 sLineComponents[i] = sLineComponents[i].Trim().ToLower();
@@ -42,7 +44,7 @@ public class PhoneticDictionary : MonoBehaviour
                     item.list_RelatedItems.Add(new PhoneticDictionaryItem(sLineComponents[0], sLineComponents[1], sLineComponents[2], false));
                 }
             }
-            else if (sLineComponents[0].Contains("/")) // Use Case Item
+            else if (item != null && sLine.Contains("/")) // Use Case Item
             {
                 sLineComponents[0].Replace("/", item.sWord);
                 sLineComponents[1].Replace("/", item.sDictionaryPronunciation);
